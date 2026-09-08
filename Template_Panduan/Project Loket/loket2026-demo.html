@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOKET2026 — Demo Sistem Loket Pelayanan Pertanahan Elektronik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bpn-navy:#0e1f3d;
+    --bpn-navy-2:#142a52;
+    --bpn-navy-3:#1c3564;
+    --bpn-gold:#c9a24b;
+    --bpn-gold-2:#e8c876;
+    --bpn-bg:#eef1f6;
+    --ink:#14213a;
+    --ink-soft:#5b6785;
+    --line:#dfe4ee;
+    --white:#ffffff;
+    --ok:#1e8a5f;
+    --ok-bg:#e5f5ee;
+    --warn:#b9790a;
+    --warn-bg:#fdf1de;
+    --info:#2464c9;
+    --info-bg:#e8f0fd;
+    --danger:#c33d3d;
+    --danger-bg:#fbeaea;
+    --grey:#5b6785;
+    --grey-bg:#eef0f4;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    background:var(--bpn-bg);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  #app{display:flex;min-height:100vh;}
+
+  /* ===== SIDEBAR ===== */
+  .sidebar{
+    width:250px;flex-shrink:0;
+    background:linear-gradient(180deg,var(--bpn-navy) 0%, var(--bpn-navy-2) 100%);
+    color:#cdd7ee;
+    display:flex;flex-direction:column;
+    position:sticky;top:0;height:100vh;
+  }
+  .brand{
+    padding:22px 20px 16px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    display:flex;align-items:center;gap:10px;
+  }
+  .brand-mark{
+    width:36px;height:36px;border-radius:8px;
+    background:var(--bpn-gold);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--bpn-navy);font-weight:800;font-size:15px;flex-shrink:0;
+  }
+  .brand-text .t1{font-weight:800;color:#fff;font-size:14.5px;letter-spacing:.2px;}
+  .brand-text .t2{font-size:10.5px;color:#93a3c8;margin-top:1px;}
+
+  .nav{flex:1;padding:14px 10px;overflow-y:auto;}
+  .nav-group-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#6f80a8;padding:14px 12px 6px;}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px;border-radius:9px;cursor:pointer;
+    font-size:13.6px;font-weight:600;color:#c3cfe8;
+    margin-bottom:2px;position:relative;
+    transition:background .12s ease;
+  }
+  .nav-item:hover{background:rgba(255,255,255,.06);}
+  .nav-item.active{background:rgba(255,255,255,.12);color:#fff;}
+  .nav-item.active::before{
+    content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:3px;
+    background:var(--bpn-gold);border-radius:3px;
+  }
+  .nav-icon{width:17px;text-align:center;flex-shrink:0;font-size:14.5px;}
+  .nav-badge{
+    margin-left:auto;min-width:19px;height:19px;padding:0 5px;border-radius:10px;
+    font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center;
+    background:var(--info);color:#fff;
+  }
+  .nav-badge.revisi{background:var(--danger);animation:pulseBadge 1.6s infinite;}
+  @keyframes pulseBadge{
+    0%{box-shadow:0 0 0 0 rgba(195,61,61,.55);}
+    70%{box-shadow:0 0 0 6px rgba(195,61,61,0);}
+    100%{box-shadow:0 0 0 0 rgba(195,61,61,0);}
+  }
+  .role-switcher{
+    margin:10px;padding:12px;border-radius:10px;
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
+  }
+  .role-switcher label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#8093ba;display:block;margin-bottom:6px;}
+  .role-switcher select{
+    width:100%;padding:7px 8px;border-radius:7px;border:1px solid rgba(255,255,255,.14);
+    background:rgba(0,0,0,.18);color:#fff;font-family:inherit;font-size:12.8px;font-weight:600;
+  }
+
+  /* ===== MAIN ===== */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .topbar{
+    height:64px;background:#fff;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 24px;position:sticky;top:0;z-index:20;
+  }
+  .topbar-title{font-size:16px;font-weight:800;}
+  .topbar-sub{font-size:12px;color:var(--ink-soft);margin-top:1px;}
+  .topbar-right{display:flex;align-items:center;gap:14px;}
+
+  .bell-wrap{position:relative;}
+  .bell-btn{
+    width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:16px;
+  }
+  .bell-btn:hover{background:var(--grey-bg);}
+  .bell-dot{
+    position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 3px;border-radius:9px;
+    background:var(--danger);color:#fff;font-size:9.5px;font-weight:800;display:flex;align-items:center;justify-content:center;
+    border:2px solid #fff;
+  }
+  .bell-dropdown{
+    position:absolute;top:48px;right:0;width:360px;max-height:440px;overflow-y:auto;
+    background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 40px rgba(14,31,61,.16);
+    z-index:50;
+  }
+  .bell-head{padding:13px 16px;border-bottom:1px solid var(--line);font-weight:800;font-size:13.5px;display:flex;justify-content:space-between;align-items:center;}
+  .bell-head span{color:var(--ink-soft);font-weight:600;font-size:11.5px;}
+  .notif-item{
+    padding:12px 16px;border-bottom:1px solid #f0f2f7;cursor:pointer;display:flex;gap:10px;align-items:flex-start;
+  }
+  .notif-item:hover{background:var(--grey-bg);}
+  .notif-item.unread{background:#f7faff;}
+  .notif-ic{
+    width:28px;height:28px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;margin-top:1px;
+  }
+  .notif-body .nt{font-size:12.6px;font-weight:700;line-height:1.35;}
+  .notif-body .nm{font-size:11.8px;color:var(--ink-soft);margin-top:2px;line-height:1.4;}
+  .notif-body .ntime{font-size:10.5px;color:#9aa5c0;margin-top:4px;}
+  .bell-empty{padding:34px 16px;text-align:center;color:var(--ink-soft);font-size:12.5px;}
+
+  .user-chip{display:flex;align-items:center;gap:9px;padding:6px 10px 6px 6px;border-radius:10px;border:1px solid var(--line);}
+  .user-avatar{width:30px;height:30px;border-radius:8px;background:var(--bpn-navy);color:var(--bpn-gold-2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12.5px;}
+  .user-chip .un{font-size:12.5px;font-weight:700;line-height:1.2;}
+  .user-chip .ur{font-size:10.5px;color:var(--ink-soft);}
+
+  .content{padding:22px 26px 40px;flex:1;}
+
+  /* ===== COMMON ===== */
+  .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px;}
+  .kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;}
+  .kpi .lbl{font-size:11.5px;color:var(--ink-soft);font-weight:700;}
+  .kpi .val{font-size:26px;font-weight:800;margin-top:6px;letter-spacing:-.02em;}
+  .kpi .sub{font-size:11px;color:var(--ink-soft);margin-top:4px;}
+  .kpi.accent-gold{border-top:3px solid var(--bpn-gold);}
+  .kpi.accent-danger{border-top:3px solid var(--danger);}
+  .kpi.accent-ok{border-top:3px solid var(--ok);}
+  .kpi.accent-info{border-top:3px solid var(--info);}
+  .kpi.accent-navy{border-top:3px solid var(--bpn-navy-3);}
+
+  .panel{background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:18px;overflow:hidden;}
+  .panel-head{padding:15px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+  .panel-head h3{margin:0;font-size:14.5px;font-weight:800;}
+  .panel-body{padding:18px;}
+
+  table.tbl{width:100%;border-collapse:collapse;font-size:12.8px;}
+  table.tbl th{
+    text-align:left;padding:10px 14px;background:#f7f8fb;color:var(--ink-soft);
+    font-size:10.8px;text-transform:uppercase;letter-spacing:.05em;font-weight:800;border-bottom:1px solid var(--line);
+  }
+  table.tbl td{padding:12px 14px;border-bottom:1px solid #f0f2f7;vertical-align:middle;}
+  table.tbl tr:hover td{background:#f9fafc;}
+  table.tbl tr.clickable{cursor:pointer;}
+
+  .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:7px;font-size:11px;font-weight:800;white-space:nowrap;}
+  .badge.b-warn{background:var(--warn-bg);color:var(--warn);}
+  .badge.b-info{background:var(--info-bg);color:var(--info);}
+  .badge.b-grey{background:var(--grey-bg);color:var(--grey);}
+  .badge.b-navy{background:#e6eaf5;color:var(--bpn-navy-3);}
+  .badge.b-dark{background:#20263a;color:#fff;}
+  .badge.b-ok{background:var(--ok-bg);color:var(--ok);}
+  .badge.b-danger{background:var(--danger-bg);color:var(--danger);}
+  .badge.dot::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;border:1px solid transparent;
+    font-family:inherit;font-size:12.8px;font-weight:700;cursor:pointer;transition:filter .1s ease,transform .05s ease;
+  }
+  .btn:active{transform:scale(.98);}
+  .btn-primary{background:var(--bpn-navy);color:#fff;}
+  .btn-primary:hover{filter:brightness(1.18);}
+  .btn-gold{background:var(--bpn-gold);color:var(--bpn-navy);}
+  .btn-gold:hover{filter:brightness(1.08);}
+  .btn-ok{background:var(--ok);color:#fff;}
+  .btn-ok:hover{filter:brightness(1.1);}
+  .btn-danger{background:var(--danger);color:#fff;}
+  .btn-danger:hover{filter:brightness(1.1);}
+  .btn-outline{background:#fff;color:var(--ink);border:1px solid var(--line);}
+  .btn-outline:hover{background:var(--grey-bg);}
+  .btn-sm{padding:6px 11px;font-size:11.8px;border-radius:7px;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+
+  .empty{padding:46px 20px;text-align:center;color:var(--ink-soft);}
+  .empty .ic{font-size:30px;margin-bottom:10px;}
+  .empty .t{font-weight:700;color:var(--ink);font-size:13.5px;}
+  .empty .d{font-size:12.3px;margin-top:4px;}
+
+  .breadcrumb{font-size:12px;color:var(--ink-soft);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+  .breadcrumb a{color:var(--info);cursor:pointer;text-decoration:none;font-weight:700;}
+
+  .grid-2{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;align-items:start;}
+
+  .field-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dashed #eceef4;font-size:12.8px;}
+  .field-row:last-child{border-bottom:none;}
+  .field-row .k{color:var(--ink-soft);font-weight:600;}
+  .field-row .v{font-weight:700;text-align:right;}
+
+  .alert{border-radius:11px;padding:14px 16px;margin-bottom:14px;font-size:12.8px;line-height:1.5;}
+  .alert-revisi{background:var(--danger-bg);border:1px solid #f3caca;}
+  .alert-revisi .ah{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--danger);font-size:13px;margin-bottom:6px;}
+  .alert-ok{background:var(--ok-bg);border:1px solid #bfe6d3;}
+  .alert-ok .ah{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--ok);font-size:13px;margin-bottom:4px;}
+  .alert-info{background:var(--info-bg);border:1px solid #c7dcf8;}
+  .alert-info .ah{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--info);font-size:13px;margin-bottom:4px;}
+  .quote-box{background:#fff;border:1px solid #f3caca;border-radius:9px;padding:11px 13px;font-style:normal;margin:8px 0;font-size:12.8px;}
+  .meta-time{font-size:11px;color:var(--ink-soft);margin-top:6px;}
+
+  .timeline{position:relative;padding-left:22px;}
+  .timeline::before{content:"";position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:var(--line);}
+  .tl-item{position:relative;padding-bottom:16px;}
+  .tl-item:last-child{padding-bottom:0;}
+  .tl-dot{position:absolute;left:-22px;top:2px;width:13px;height:13px;border-radius:50%;background:var(--bpn-navy-3);border:2px solid #fff;box-shadow:0 0 0 2px var(--line);}
+  .tl-dot.revisi{background:var(--danger);}
+  .tl-dot.ok{background:var(--ok);}
+  .tl-item .tt{font-size:12.6px;font-weight:700;}
+  .tl-item .td{font-size:11.6px;color:var(--ink-soft);margin-top:2px;}
+
+  .form-group{margin-bottom:14px;}
+  .form-group label{display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--ink);}
+  .form-group input,.form-group select,.form-group textarea{
+    width:100%;padding:10px 12px;border-radius:9px;border:1px solid var(--line);font-family:inherit;font-size:13px;background:#fbfcfe;
+  }
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:2px solid var(--bpn-navy-3);outline-offset:0;background:#fff;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  .toast-wrap{position:fixed;bottom:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:8px;}
+  .toast{background:var(--bpn-navy);color:#fff;padding:12px 16px;border-radius:10px;font-size:12.8px;font-weight:600;box-shadow:0 10px 26px rgba(14,31,61,.3);display:flex;align-items:center;gap:9px;min-width:260px;animation:toastIn .25s ease;}
+  .toast .tic{color:var(--bpn-gold-2);font-size:15px;}
+  @keyframes toastIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+  .pillbar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  .pill{padding:7px 13px;border-radius:20px;background:#fff;border:1px solid var(--line);font-size:12px;font-weight:700;cursor:pointer;color:var(--ink-soft);}
+  .pill.active{background:var(--bpn-navy);color:#fff;border-color:var(--bpn-navy);}
+
+  .sub-note{font-size:11.6px;color:var(--ink-soft);margin-top:8px;line-height:1.5;}
+  .divider{height:1px;background:var(--line);margin:16px 0;}
+  ::-webkit-scrollbar{width:9px;height:9px;}
+  ::-webkit-scrollbar-thumb{background:#c6cee0;border-radius:6px;}
+
+  @media (max-width:980px){
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+    .grid-2{grid-template-columns:1fr;}
+    .sidebar{position:fixed;left:-260px;transition:left .2s;z-index:60;}
+    .sidebar.open{left:0;}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* =========================================================
+   LOKET2026 — DEMO INTERAKTIF (front-end only, in-memory)
+   Simulasi: workflow 5 tahap, revisi antar-tahap, notifikasi
+   real-time + konfirmasi revisi dua arah (sesuai Bab 9 PRD)
+   ========================================================= */
+
+const STAGE_LABEL = {
+  loket:'Loket', verifikator:'Verifikator', warkah:'Warkah',
+  validator:'Validator', alih_media:'Alih Media', admin:'Admin', pimpinan:'Pimpinan'
+};
+const STAGE_ICON = {
+  loket:'🗂️', verifikator:'✅', warkah:'📁', validator:'🛡️', alih_media:'💻', admin:'🛠️', pimpinan:'📈'
+};
+const STATUS_LABEL = {
+  diterima:'Diterima di Loket', verifikasi:'Pemeriksaan Verifikator/Warkah',
+  validasi:'Validasi Data Pertanahan', alih_media:'Proses Alih Media',
+  selesai:'Selesai', dikembalikan:'Dikembalikan (Revisi)', batal:'Dibatalkan'
+};
+const STATUS_BADGE = {
+  diterima:'b-warn', verifikasi:'b-info', validasi:'b-navy', alih_media:'b-dark',
+  selesai:'b-ok', dikembalikan:'b-danger', batal:'b-danger'
+};
+
+let uid = 1000;
+const nextId = () => uid++;
+
+// ---------- SEED DATA ----------
+let tickets = [];
+let notifikasis = [];
+
+function seed(){
+  tickets = [
+    mkTicket({
+      no:'K/23/070926/1', jenis:'JP02 — Peralihan Hak (Jual Beli)', pemohon:'Ahmad Fauzi', nik:'1871xxxxxxx0001',
+      status:'dikembalikan', status_verifikator:'revisi_ke_loket', status_warkah:'proses', p:'P1',
+      history:[
+        h('—','diterima','Petugas Loket A'),
+        h('diterima','verifikasi','Petugas Loket A'),
+        h('verifikasi','dikembalikan','Verifikator — dokumen kurang'),
+      ],
+      revisions:[{stage_asal:'verifikator', stage_tujuan:'loket', sub_bidang:null,
+        pesan:'Dokumen KTP pemohon tidak terbaca, mohon di-scan ulang dengan resolusi lebih tinggi.',
+        status:'aktif', created_at:'07/09/2026 10:15'}]
+    }),
+    mkTicket({
+      no:'K/12/070926/1', jenis:'JP06 — Pemecahan Sertifikat', pemohon:'Siti Rahmawati', nik:'1871xxxxxxx0002',
+      status:'verifikasi', status_verifikator:'proses', status_warkah:'proses', p:'P0',
+      history:[ h('—','diterima','Petugas Loket A'), h('diterima','verifikasi','Petugas Loket A') ],
+      revisions:[]
+    }),
+    mkTicket({
+      no:'K/09/070926/2', jenis:'JP01 — Pendaftaran Tanah Pertama Kali', pemohon:'Koperasi Tani Makmur', nik:'—',
+      status:'validasi', status_verifikator:'selesai', status_warkah:'revisi', p:'P0',
+      history:[ h('—','diterima','Petugas Loket B'), h('diterima','verifikasi','Petugas Loket B'),
+        h('verifikasi','validasi','Warkah & Verifikator selesai') ],
+      revisions:[{stage_asal:'validator', stage_tujuan:'warkah', sub_bidang:null,
+        pesan:'Data letak bidang pada warkah tidak sesuai dengan hasil plotting terbaru, mohon dicek ulang lokasi fisik.',
+        status:'aktif', created_at:'07/09/2026 09:40'}]
+    }),
+    mkTicket({
+      no:'K/18/070926/1', jenis:'JP13 — Alih Media (Analog ke Elektronik)', pemohon:'Budi Santoso', nik:'1871xxxxxxx0004',
+      status:'alih_media', status_verifikator:'selesai', status_warkah:'selesai', p:'P0',
+      history:[ h('—','diterima','Petugas Loket A'), h('diterima','verifikasi','Petugas Loket A'),
+        h('verifikasi','validasi','Warkah & Verifikator selesai'), h('validasi','alih_media','Validator — lulus gatekeeper') ],
+      revisions:[], pra_btel:'selesai', pra_suel:'selesai'
+    }),
+    mkTicket({
+      no:'K/05/070926/1', jenis:'JP03 — Peralihan Hak (Waris)', pemohon:'Dewi Lestari', nik:'1871xxxxxxx0005',
+      status:'selesai', status_verifikator:'selesai', status_warkah:'selesai', p:'P0',
+      history:[ h('—','diterima','Petugas Loket A'), h('diterima','verifikasi','Petugas Loket A'),
+        h('verifikasi','validasi','Warkah & Verifikator selesai'), h('validasi','alih_media','Validator — lulus gatekeeper'),
+        h('alih_media','selesai','Alih Media — Sertifikat Elektronik terbit') ],
+      revisions:[]
+    }),
+  ];
+
+  notifikasis = [
+    notif('verifikator','revisi_masuk','Revisi menunggu diterima', 'Loket akan segera menerima revisi ini.', false, tickets[0], true, '07/09 10:15', true),
+    notif('loket','revisi_masuk','Revisi dari Verifikator', 'Dokumen KTP pemohon tidak terbaca, mohon di-scan ulang dengan resolusi lebih tinggi.', true, tickets[0], true, '07/09 10:15', false),
+    notif('verifikator','forward_masuk','Tiket baru masuk antrean', tickets[1].no+' diteruskan dari Loket.', false, tickets[1], false, '07/09 09:02', false),
+    notif('warkah','forward_masuk','Tiket baru masuk antrean', tickets[1].no+' diteruskan dari Loket (paralel).', false, tickets[1], false, '07/09 09:02', false),
+    notif('warkah','revisi_masuk','Revisi dari Validator', 'Data letak bidang pada warkah tidak sesuai dengan hasil plotting terbaru, mohon dicek ulang lokasi fisik.', true, tickets[2], true, '07/09 09:40', false),
+    notif('validator','revisi_masuk','Revisi menunggu diterima', 'Warkah akan segera menerima revisi ini.', false, tickets[2], true, '07/09 09:40', true),
+    notif('alih_media','forward_masuk','Tiket baru masuk antrean', tickets[3].no+' diteruskan dari Validator.', false, tickets[3], false, '07/09 08:20', false),
+    notif('loket','forward_masuk','Sertifikat elektronik terbit', tickets[4].no+' selesai, pemohon dapat mengambil sertifikat.', false, tickets[4], false, '06/09 16:10', true),
+  ];
+}
+
+function mkTicket(o){
+  return {
+    id: nextId(),
+    no: o.no, jenis: o.jenis, pemohon: o.pemohon, nik: o.nik,
+    status: o.status, status_verifikator: o.status_verifikator, status_warkah: o.status_warkah,
+    p: o.p, tanggal: '07/09/2026',
+    history: o.history, revisions: o.revisions,
+    pra_btel: o.pra_btel || 'belum', pra_suel: o.pra_suel || 'belum'
+  };
+}
+function h(dari,ke,ket){ return {dari,ke,ket,waktu:'07/09/2026'}; }
+function notif(role,tipe,judul,pesan,butuh,tiket,isRevisiRelated,waktu,isRead){
+  return {
+    id: nextId(), role_tujuan: role, tipe, judul, pesan,
+    butuh_konfirmasi: butuh, tiket_id: tiket.id, tiket_no: tiket.no,
+    is_read: isRead, waktu
+  };
+}
+
+// ---------- APP STATE ----------
+let state = {
+  role: 'admin',
+  view: 'dashboard',   // dashboard | list | detail | tracking | laporan
+  listStage: null,
+  selectedId: null,
+  bellOpen: false,
+  toast: null,
+};
+
+const ROLES = ['admin','loket','verifikator','warkah','validator','alih_media','pimpinan'];
+
+// ---------- HELPERS ----------
+function getTicket(id){ return tickets.find(t=>t.id===id); }
+
+function unreadCountForRole(role, kind){
+  return notifikasis.filter(n=>{
+    if(n.role_tujuan!==role || n.is_read) return false;
+    if(kind==='revisi') return n.tipe==='revisi_masuk';
+    if(kind==='forward') return n.tipe!=='revisi_masuk';
+    return true;
+  }).length;
+}
+function activeRevisiFor(ticket, stage){
+  return ticket.revisions.find(r=>r.stage_tujuan===stage && r.status==='aktif');
+}
+function confirmedRevisiWaitingResend(ticket, stage){
+  return ticket.revisions.find(r=>r.stage_tujuan===stage && r.status==='dikonfirmasi');
+}
+function revisiSentByMeWaitingConfirm(ticket, stage){
+  return ticket.revisions.filter(r=>r.stage_asal===stage && r.status==='aktif');
+}
+function revisiSentByMeConfirmed(ticket, stage){
+  return ticket.revisions.filter(r=>r.stage_asal===stage && r.status==='dikonfirmasi');
+}
+
+function kirimNotifikasi(role, tipe, judul, pesan, butuh, ticket){
+  notifikasis.unshift({
+    id: nextId(), role_tujuan: role, tipe, judul, pesan,
+    butuh_konfirmasi: butuh, tiket_id: ticket.id, tiket_no: ticket.no,
+    is_read: false, waktu:'baru saja'
+  });
+}
+function markReadForRoleOnTicket(role, ticketId){
+  notifikasis.forEach(n=>{ if(n.role_tujuan===role && n.tiket_id===ticketId) n.is_read = true; });
+}
+function showToast(text, icon){
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className='toast';
+  el.innerHTML = `<span class="tic">${icon||'🔔'}</span><span>${text}</span>`;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, 3400);
+}
+
+// ---------- ACTIONS (mutating workflow) ----------
+function actForwardFromLoket(ticket){
+  ticket.status='verifikasi'; ticket.status_verifikator='proses'; ticket.status_warkah='proses';
+  ticket.history.push(h('diterima','verifikasi','Petugas Loket — diteruskan'));
+  kirimNotifikasi('verifikator','forward_masuk','Tiket baru masuk antrean', ticket.no+' diteruskan dari Loket.', false, ticket);
+  kirimNotifikasi('warkah','forward_masuk','Tiket baru masuk antrean (paralel)', ticket.no+' diteruskan dari Loket.', false, ticket);
+  showToast('Tiket '+ticket.no+' diteruskan ke Verifikator & Warkah', '➡️');
+  render();
+}
+function actVerifikatorLengkap(ticket){
+  ticket.status_verifikator='selesai';
+  ticket.history.push(h('verifikasi','verifikasi','Verifikator — berkas lengkap'));
+  showToast('Berkas dinyatakan lengkap oleh Verifikator', '✅');
+  maybeJoinToValidasi(ticket);
+  render();
+}
+function actWarkahDitemukan(ticket){
+  ticket.status_warkah='selesai';
+  ticket.history.push(h('verifikasi','verifikasi','Warkah — berkas fisik ditemukan'));
+  showToast('Warkah ditemukan & sesuai', '✅');
+  maybeJoinToValidasi(ticket);
+  render();
+}
+function maybeJoinToValidasi(ticket){
+  if(ticket.status_verifikator==='selesai' && ticket.status_warkah==='selesai' && ticket.status==='verifikasi'){
+    ticket.status='validasi';
+    ticket.history.push(h('verifikasi','validasi','Verifikator & Warkah selesai — diteruskan ke Validator'));
+    kirimNotifikasi('validator','forward_masuk','Tiket baru masuk antrean', ticket.no+' diteruskan dari Warkah/Verifikator.', false, ticket);
+    showToast('Verifikator & Warkah selesai — tiket '+ticket.no+' lanjut ke Validator', '➡️');
+  }
+}
+function actKirimRevisi(ticket, stageAsal, stageTujuan, pesan, subBidang){
+  if(!pesan || !pesan.trim()){ showToast('Catatan revisi wajib diisi', '⚠️'); return; }
+  ticket.revisions.push({stage_asal:stageAsal, stage_tujuan:stageTujuan, sub_bidang:subBidang||null,
+    pesan:pesan.trim(), status:'aktif', created_at:'baru saja'});
+  if(stageTujuan==='loket'){ ticket.status='dikembalikan'; if(stageAsal==='verifikator') ticket.status_verifikator='revisi_ke_loket'; }
+  else if(stageTujuan==='verifikator'){ ticket.status_verifikator='revisi_ke_loket'; }
+  else if(stageTujuan==='warkah'){ ticket.status_warkah='revisi'; }
+  ticket.history.push(h(stageAsal, stageTujuan, STAGE_LABEL[stageAsal]+' — mengembalikan dengan catatan revisi'));
+  kirimNotifikasi(stageTujuan,'revisi_masuk','Revisi dari '+STAGE_LABEL[stageAsal], pesan.trim(), true, ticket);
+  kirimNotifikasi(stageAsal,'revisi_masuk','Revisi menunggu diterima', STAGE_LABEL[stageTujuan]+' akan segera menerima revisi ini.', false, ticket);
+  showToast('Revisi dikirim ke '+STAGE_LABEL[stageTujuan], '🔴');
+  render();
+}
+function actKonfirmasiRevisi(ticket, revisiIdx){
+  const r = ticket.revisions[revisiIdx];
+  r.status='dikonfirmasi'; r.confirmed_at='baru saja';
+  markReadForRoleOnTicket(r.stage_tujuan, ticket.id);
+  kirimNotifikasi(r.stage_asal,'revisi_dikonfirmasi','Revisi dikonfirmasi', STAGE_LABEL[r.stage_tujuan]+' telah menerima & sedang memproses revisi tiket '+ticket.no+'.', false, ticket);
+  showToast('Revisi dikonfirmasi — silakan perbaiki data', '✅');
+  render();
+}
+function actKirimUlangRevisi(ticket, revisiIdx){
+  const r = ticket.revisions[revisiIdx];
+  r.status='tertangani';
+  if(r.stage_tujuan==='loket'){ ticket.status='verifikasi'; ticket.status_verifikator='proses'; ticket.p = nextP(ticket.p); }
+  else if(r.stage_tujuan==='verifikator'){ ticket.status_verifikator='proses'; }
+  else if(r.stage_tujuan==='warkah'){ ticket.status_warkah='proses'; ticket.status='verifikasi'; }
+  ticket.history.push(h(r.stage_tujuan, r.stage_asal, STAGE_LABEL[r.stage_tujuan]+' — perbaikan selesai, dikirim kembali'));
+  kirimNotifikasi(r.stage_asal,'revisi_selesai_dikirim_ulang','Tiket dikirim ulang', STAGE_LABEL[r.stage_tujuan]+' telah memperbaiki & mengirim kembali tiket '+ticket.no+'.', false, ticket);
+  showToast('Tiket dikirim kembali ke '+STAGE_LABEL[r.stage_asal], '🔁');
+  render();
+}
+function nextP(p){ const order=['P0','P1','P2','P3','P4','P5']; const i=order.indexOf(p); return order[Math.min(i+1,5)]; }
+
+function actWarkahForwardToValidator(ticket){
+  if(ticket.status_verifikator!=='selesai'){ showToast('Menunggu Verifikator menyelesaikan pemeriksaan', '⏳'); return; }
+  maybeJoinToValidasi(ticket); render();
+}
+function actValidatorApprove(ticket){
+  if(ticket.pra_btel!=='selesai' || ticket.pra_suel!=='selesai'){
+    showToast('Gatekeeper: Pra-BTel & Pra-SuEl harus selesai untuk semua bidang', '⚠️'); return;
+  }
+  ticket.status='alih_media';
+  ticket.history.push(h('validasi','alih_media','Validator — lulus, diteruskan ke Alih Media'));
+  kirimNotifikasi('alih_media','forward_masuk','Tiket baru masuk antrean', ticket.no+' diteruskan dari Validator.', false, ticket);
+  showToast('Tiket diteruskan ke Alih Media', '➡️');
+  render();
+}
+function actSetGatekeeper(ticket, field, value){ ticket[field]=value; render(); }
+function actAlihMediaComplete(ticket){
+  ticket.status='selesai';
+  ticket.history.push(h('alih_media','selesai','Alih Media — Sertifikat Elektronik terbit'));
+  kirimNotifikasi('loket','forward_masuk','Sertifikat elektronik terbit', ticket.no+' selesai, pemohon dapat mengambil sertifikat.', false, ticket);
+  showToast('Sertifikat Elektronik diterbitkan 🎉', '🎉');
+  render();
+}
+function actCreateTicket(data){
+  const t = mkTicket({no:data.no, jenis:data.jenis, pemohon:data.pemohon, nik:data.nik||'—',
+    status:'diterima', status_verifikator:'proses', status_warkah:'proses', p:'P0',
+    history:[h('—','diterima','Petugas Loket — registrasi baru')], revisions:[]});
+  tickets.unshift(t);
+  showToast('Tiket '+t.no+' berhasil dibuat', '📝');
+  state.view='detail'; state.selectedId=t.id;
+  render();
+}
+
+// ---------- STAGE OF ROLE ----------
+function stageKey(role){
+  if(role==='validator') return 'validator';
+  return role;
+}
+function ticketsForStage(role){
+  if(role==='admin') return tickets;
+  if(role==='pimpinan') return tickets;
+  const map = {
+    loket:['diterima','dikembalikan'],
+    verifikator:['verifikasi'],
+    warkah:['verifikasi'],
+    validator:['validasi'],
+    alih_media:['alih_media'],
+  };
+  const statuses = map[role]||[];
+  return tickets.filter(t=>statuses.includes(t.status) || t.revisions.some(r=>r.stage_tujuan===role && (r.status==='aktif')));
+}
+
+// ---------- RENDER: LAYOUT ----------
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    ${renderSidebar()}
+    <div class="main">
+      ${renderTopbar()}
+      <div class="content">${renderContent()}</div>
+    </div>
+  `;
+  bindGlobalEvents();
+}
+
+function navItem(icon, label, viewKey, stage, badgeCount, badgeType, activeCheck){
+  const active = activeCheck ? 'active' : '';
+  let badge = '';
+  if(badgeCount>0){
+    badge = `<span class="nav-badge ${badgeType==='revisi'?'revisi':''}">${badgeCount}</span>`;
+  }
+  return `<div class="nav-item ${active}" data-nav="${viewKey}" data-stage="${stage||''}">
+    <span class="nav-icon">${icon}</span><span>${label}</span>${badge}
+  </div>`;
+}
+
+function renderSidebar(){
+  const role = state.role;
+  let items = '';
+  items += navItem('🏠','Dashboard','dashboard', null, 0, null, state.view==='dashboard');
+
+  const stages = role==='admin' ? ['loket','verifikator','warkah','validator','alih_media'] :
+                 role==='pimpinan' ? [] : [role];
+
+  stages.forEach(s=>{
+    const fwd = unreadCountForRole(s,'forward');
+    const rev = unreadCountForRole(s,'revisi');
+    const total = fwd+rev;
+    items += navItem(STAGE_ICON[s], STAGE_LABEL[s], 'list', s, total, rev>0?'revisi':'forward', state.view==='list' && state.listStage===s);
+  });
+
+  items += navItem('📈','Laporan','laporan', null, 0, null, state.view==='laporan');
+  if(role==='admin' || role==='pimpinan'){
+    items += navItem('🗄️','Arsip','laporan', null, 0, null, false);
+  }
+  items += navItem('🌐','Tracking Publik','tracking', null, 0, null, state.view==='tracking');
+
+  const roleOptions = ROLES.map(r=>`<option value="${r}" ${r===role?'selected':''}>${STAGE_ICON[r]} ${STAGE_LABEL[r]}</option>`).join('');
+
+  return `
+  <div class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">L26</div>
+      <div class="brand-text">
+        <div class="t1">LOKET2026</div>
+        <div class="t2">Kantah Kota Bandar Lampung</div>
+      </div>
+    </div>
+    <div class="role-switcher">
+      <label>Simulasikan sebagai role</label>
+      <select id="roleSelect">${roleOptions}</select>
+    </div>
+    <div class="nav">
+      <div class="nav-group-label">Menu Utama</div>
+      ${items}
+    </div>
+    <div style="padding:14px 18px;font-size:10.5px;color:#6f80a8;border-top:1px solid rgba(255,255,255,.08);">
+      Demo front-end • data simulasi, tidak tersimpan permanen
+    </div>
+  </div>`;
+}
+
+function timeAgoIcon(tipe){
+  return {forward_masuk:'➡️', revisi_masuk:'🔴', revisi_dikonfirmasi:'✅', revisi_selesai_dikirim_ulang:'🔁'}[tipe] || '🔔';
+}
+function timeAgoColor(tipe){
+  return {forward_masuk:'b-info', revisi_masuk:'b-danger', revisi_dikonfirmasi:'b-ok', revisi_selesai_dikirim_ulang:'b-navy'}[tipe] || 'b-grey';
+}
+
+function renderTopbar(){
+  const myNotifs = notifikasis.filter(n=>n.role_tujuan===state.role || state.role==='admin').slice(0,12);
+  const unread = myNotifs.filter(n=>!n.is_read).length;
+
+  let title = 'Dashboard'; let sub = 'Ringkasan aktivitas sistem';
+  if(state.view==='list'){ title = 'Modul '+STAGE_LABEL[state.listStage]; sub='Daftar tiket pada tahap ini'; }
+  if(state.view==='detail'){ const t=getTicket(state.selectedId); title = t? t.no : 'Detail Tiket'; sub = t? t.jenis : ''; }
+  if(state.view==='laporan'){ title='Laporan & Monitoring'; sub='Statistik permohonan periode berjalan'; }
+  if(state.view==='tracking'){ title='Tracking Publik'; sub='Pelacakan status berkas oleh pemohon'; }
+  if(state.view==='createTicket'){ title='Registrasi Tiket Baru'; sub='Modul Loket'; }
+
+  const initials = STAGE_LABEL[state.role].split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+
+  return `
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">${title}</div>
+      <div class="topbar-sub">${sub}</div>
+    </div>
+    <div class="topbar-right">
+      <div class="bell-wrap">
+        <div class="bell-btn" id="bellBtn">🔔${unread>0?`<span class="bell-dot">${unread}</span>`:''}</div>
+        ${state.bellOpen ? renderBellDropdown(myNotifs) : ''}
+      </div>
+      <div class="user-chip">
+        <div class="user-avatar">${initials}</div>
+        <div>
+          <div class="un">${state.role==='admin'?'Administrator':STAGE_LABEL[state.role]+' 1'}</div>
+          <div class="ur">${STAGE_LABEL[state.role]}</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderBellDropdown(myNotifs){
+  if(myNotifs.length===0){
+    return `<div class="bell-dropdown"><div class="bell-head">Notifikasi</div><div class="bell-empty">Belum ada notifikasi.</div></div>`;
+  }
+  const rows = myNotifs.map(n=>{
+    const ic = timeAgoIcon(n.tipe);
+    const col = timeAgoColor(n.tipe);
+    return `<div class="notif-item ${n.is_read?'':'unread'}" data-open-notif="${n.tiket_id}" data-notif-id="${n.id}">
+      <div class="notif-ic badge ${col}">${ic}</div>
+      <div class="notif-body">
+        <div class="nt">${n.judul}</div>
+        <div class="nm">${n.tiket_no} — ${n.pesan}</div>
+        <div class="ntime">${n.waktu}${n.butuh_konfirmasi?' · perlu konfirmasi':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+  return `<div class="bell-dropdown">
+    <div class="bell-head">Notifikasi <span>${myNotifs.filter(n=>!n.is_read).length} belum dibaca</span></div>
+    ${rows}
+  </div>`;
+}
+
+// ---------- RENDER: CONTENT SWITCH ----------
+function renderContent(){
+  if(state.view==='dashboard') return renderDashboard();
+  if(state.view==='list') return renderList();
+  if(state.view==='detail') return renderDetail();
+  if(state.view==='laporan') return renderLaporan();
+  if(state.view==='tracking') return renderTracking();
+  if(state.view==='createTicket') return renderCreateTicket();
+  return '';
+}
+
+function renderDashboard(){
+  const total = tickets.length;
+  const proses = tickets.filter(t=>!['selesai','batal'].includes(t.status)).length;
+  const selesai = tickets.filter(t=>t.status==='selesai').length;
+  const revisiAktif = tickets.reduce((a,t)=>a+t.revisions.filter(r=>r.status==='aktif').length,0);
+  const menungguKonfirmasi = tickets.reduce((a,t)=>a+t.revisions.filter(r=>r.status==='aktif').length,0);
+
+  const kpis = `
+  <div class="kpi-grid">
+    <div class="kpi accent-navy"><div class="lbl">Total Permohonan</div><div class="val">${total}</div><div class="sub">seluruh tahap</div></div>
+    <div class="kpi accent-info"><div class="lbl">Dalam Proses</div><div class="val">${proses}</div><div class="sub">belum selesai/batal</div></div>
+    <div class="kpi accent-ok"><div class="lbl">Selesai</div><div class="val">${selesai}</div><div class="sub">sertifikat terbit</div></div>
+    <div class="kpi accent-danger"><div class="lbl">Revisi Aktif</div><div class="val">${revisiAktif}</div><div class="sub">butuh tindakan</div></div>
+    <div class="kpi accent-gold"><div class="lbl">Menunggu Konfirmasi</div><div class="val">${menungguKonfirmasi}</div><div class="sub">belum dikonfirmasi</div></div>
+  </div>`;
+
+  const rows = tickets.slice(0,8).map(t=>{
+    const activeRev = t.revisions.find(r=>r.status!=='tertangani');
+    return `<tr class="clickable" data-open="${t.id}">
+      <td class="mono">${t.no}</td>
+      <td>${t.pemohon}<div class="sub-note" style="margin:0;">${t.jenis}</div></td>
+      <td><span class="badge ${STATUS_BADGE[t.status]} dot">${STATUS_LABEL[t.status]}</span></td>
+      <td>${t.p}</td>
+      <td>${activeRev ? `<span class="badge b-danger">🔴 ${STAGE_LABEL[activeRev.stage_tujuan]} — ${activeRev.status}</span>` : '<span class="badge b-grey">normal</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  return `
+    ${kpis}
+    <div class="panel">
+      <div class="panel-head"><h3>Tiket Terbaru</h3><span class="sub-note">Klik baris untuk membuka detail</span></div>
+      <div class="panel-body" style="padding:0;">
+        <table class="tbl">
+          <thead><tr><th>No. Tiket</th><th>Pemohon</th><th>Status</th><th>Iterasi</th><th>Status Notifikasi</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>Fitur Baru — Sistem Notifikasi & Konfirmasi Revisi</h3></div>
+      <div class="panel-body">
+        <p style="margin:0 0 10px;font-size:13px;line-height:1.6;">
+          Coba lihat tiket <b class="mono">K/23/070926/1</b> sebagai role <b>Loket</b>, atau tiket
+          <b class="mono">K/09/070926/2</b> sebagai role <b>Warkah</b> — keduanya punya revisi aktif yang menunggu
+          tombol <b>“Konfirmasi Terima Revisi”</b> sebelum bisa dikerjakan.
+        </p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" data-goto-role="loket" data-goto-ticket="${tickets[0].id}">Buka sebagai Loket →</button>
+          <button class="btn btn-outline btn-sm" data-goto-role="warkah" data-goto-ticket="${tickets[2].id}">Buka sebagai Warkah →</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderList(){
+  const stage = state.listStage;
+  const list = ticketsForStage(stage);
+  if(list.length===0){
+    return `<div class="panel"><div class="empty">
+      <div class="ic">📭</div><div class="t">Tidak ada tiket pada tahap ini</div>
+      <div class="d">Belum ada berkas yang masuk ke antrean ${STAGE_LABEL[stage]}.</div>
+    </div></div>`;
+  }
+  const rows = list.map(t=>{
+    const activeRev = activeRevisiFor(t, stage) || confirmedRevisiWaitingResend(t, stage);
+    const sentByMe = revisiSentByMeWaitingConfirm(t, stage)[0];
+    let tag = '';
+    if(activeRevisiFor(t, stage)) tag = `<span class="badge b-danger">🔴 Perlu Revisi</span>`;
+    else if(confirmedRevisiWaitingResend(t, stage)) tag = `<span class="badge b-ok">✅ Dikonfirmasi — perbaiki & kirim ulang</span>`;
+    else if(sentByMe) tag = `<span class="badge b-warn">⏳ Menunggu konfirmasi tujuan</span>`;
+    else tag = `<span class="badge b-grey">normal</span>`;
+    return `<tr class="clickable" data-open="${t.id}">
+      <td class="mono">${t.no}</td>
+      <td>${t.pemohon}<div class="sub-note" style="margin:0;">${t.jenis}</div></td>
+      <td><span class="badge ${STATUS_BADGE[t.status]} dot">${STATUS_LABEL[t.status]}</span></td>
+      <td>${t.p}</td>
+      <td>${tag}</td>
+      <td style="text-align:right;"><span class="btn btn-outline btn-sm">Buka →</span></td>
+    </tr>`;
+  }).join('');
+
+  const createBtn = stage==='loket' ? `<button class="btn btn-primary btn-sm" id="btnNewTicket">＋ Registrasi Tiket Baru</button>` : '';
+
+  return `
+    <div class="breadcrumb"><a data-nav="dashboard">Dashboard</a> <span>/</span> <span>${STAGE_LABEL[stage]}</span></div>
+    <div class="panel">
+      <div class="panel-head"><h3>Antrean ${STAGE_LABEL[stage]} (${list.length})</h3>${createBtn}</div>
+      <div class="panel-body" style="padding:0;">
+        <table class="tbl">
+          <thead><tr><th>No. Tiket</th><th>Pemohon</th><th>Status</th><th>Iterasi</th><th>Notifikasi</th><th></th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderCreateTicket(){
+  return `
+    <div class="breadcrumb"><a data-nav="dashboard">Dashboard</a> <span>/</span> <a data-nav="list" data-stage="loket">Loket</a> <span>/</span> <span>Registrasi Baru</span></div>
+    <div class="panel" style="max-width:640px;">
+      <div class="panel-head"><h3>Form Registrasi Tiket Baru</h3></div>
+      <div class="panel-body">
+        <div class="form-group"><label>Nomor Tiket</label><input id="fNo" value="K/${Math.floor(Math.random()*90+10)}/070926/1"></div>
+        <div class="form-group"><label>Jenis Permohonan</label>
+          <select id="fJenis">
+            <option>JP01 — Pendaftaran Tanah Pertama Kali</option>
+            <option>JP02 — Peralihan Hak (Jual Beli)</option>
+            <option>JP03 — Peralihan Hak (Waris)</option>
+            <option>JP05 — Roya</option>
+            <option>JP06 — Pemecahan Sertifikat</option>
+            <option>JP09 — Pendaftaran Hak Tanggungan</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Nama Pemohon</label><input id="fPemohon" placeholder="Nama lengkap pemohon"></div>
+          <div class="form-group"><label>NIK</label><input id="fNik" placeholder="16 digit NIK"></div>
+        </div>
+        <button class="btn btn-primary" id="btnSubmitTicket">Simpan &amp; Buka Tiket</button>
+        <button class="btn btn-outline" data-nav="list" data-stage="loket">Batal</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderDetail(){
+  const t = getTicket(state.selectedId);
+  if(!t) return `<div class="empty"><div class="t">Tiket tidak ditemukan</div></div>`;
+  const role = state.role;
+
+  const historyHtml = t.history.slice().reverse().map(hh=>{
+    const isRev = /revisi|dikembalikan|Revisi/i.test(hh.ket);
+    return `<div class="tl-item">
+      <div class="tl-dot ${isRev?'revisi':''}"></div>
+      <div class="tt">${hh.ket}</div>
+      <div class="td">${hh.waktu} · ${hh.dari} → ${hh.ke}</div>
+    </div>`;
+  }).join('');
+
+  // Revision panels relevant to whichever stage the current role represents
+  let revisionPanels = '';
+  const stagesToCheck = role==='admin' ? ['loket','verifikator','warkah','validator','alih_media'] : [role];
+  stagesToCheck.forEach(stage=>{
+    const idxActive = t.revisions.findIndex(r=>r.stage_tujuan===stage && r.status==='aktif');
+    const idxConfirmed = t.revisions.findIndex(r=>r.stage_tujuan===stage && r.status==='dikonfirmasi');
+    const sentWaiting = t.revisions.filter(r=>r.stage_asal===stage && r.status==='aktif');
+    const sentConfirmed = t.revisions.filter(r=>r.stage_asal===stage && r.status==='dikonfirmasi');
+
+    if(idxActive>-1){
+      const r = t.revisions[idxActive];
+      revisionPanels += `
+      <div class="alert alert-revisi">
+        <div class="ah">🔴 Revisi dari ${STAGE_LABEL[r.stage_asal]} ${r.sub_bidang?('('+r.sub_bidang+')'):''} — ditujukan ke ${STAGE_LABEL[stage]}</div>
+        <div class="quote-box">"${r.pesan}"</div>
+        <div class="meta-time">Dikirim ${r.created_at}</div>
+        <div style="margin-top:10px;">
+          <button class="btn btn-ok btn-sm" data-confirm-revisi="${idxActive}" data-tid="${t.id}">✅ Konfirmasi Terima Revisi</button>
+        </div>
+      </div>`;
+    } else if(idxConfirmed>-1){
+      const r = t.revisions[idxConfirmed];
+      revisionPanels += `
+      <div class="alert alert-ok">
+        <div class="ah">✅ Revisi telah dikonfirmasi</div>
+        <div style="font-size:12.6px;">Dikonfirmasi ${r.confirmed_at} — silakan perbaiki data sesuai catatan lalu kirim kembali ke ${STAGE_LABEL[r.stage_asal]}.</div>
+        <div class="quote-box">"${r.pesan}"</div>
+        <div style="margin-top:10px;">
+          <button class="btn btn-gold btn-sm" data-resend-revisi="${idxConfirmed}" data-tid="${t.id}">🔁 Kirim Kembali ke ${STAGE_LABEL[r.stage_asal]}</button>
+        </div>
+      </div>`;
+    }
+    sentWaiting.forEach(r=>{
+      revisionPanels += `
+      <div class="alert alert-info">
+        <div class="ah">⏳ Menunggu Konfirmasi</div>
+        <div style="font-size:12.6px;">Revisi telah dikirim ke ${STAGE_LABEL[r.stage_tujuan]}, menunggu mereka menekan "Konfirmasi Terima Revisi".</div>
+      </div>`;
+    });
+    sentConfirmed.forEach(r=>{
+      revisionPanels += `
+      <div class="alert alert-info">
+        <div class="ah">ℹ️ Sedang Diproses</div>
+        <div style="font-size:12.6px;">${STAGE_LABEL[r.stage_tujuan]} telah menerima revisi dan sedang memperbaiki data.</div>
+      </div>`;
+    });
+  });
+
+  // Action buttons depending on role + ticket state
+  let actions = '';
+  if(role==='loket' || role==='admin'){
+    if(t.status==='diterima'){
+      actions += `<button class="btn btn-primary" data-forward-loket="${t.id}">➡️ Teruskan ke Verifikator &amp; Warkah</button>`;
+    }
+  }
+  if(role==='verifikator' || role==='admin'){
+    if(t.status==='verifikasi' && t.status_verifikator==='proses'){
+      actions += `<button class="btn btn-ok" data-verif-lengkap="${t.id}">✅ Berkas Lengkap</button>`;
+      actions += revisiForm(t,'verifikator','loket','Kirim revisi ke Loket');
+    }
+  }
+  if(role==='warkah' || role==='admin'){
+    if(t.status==='verifikasi' && t.status_warkah==='proses'){
+      actions += `<button class="btn btn-ok" data-warkah-ok="${t.id}">✅ Warkah Ditemukan &amp; Sesuai</button>`;
+      actions += revisiForm(t,'warkah','verifikator','Kirim revisi ke Verifikator/Loket');
+    }
+  }
+  if(role==='validator' || role==='admin'){
+    if(t.status==='validasi'){
+      actions += `
+        <div class="form-group" style="max-width:340px;">
+          <label>Gatekeeper — Pra-BTel</label>
+          <select data-gate="pra_btel" data-tid="${t.id}">
+            <option value="belum" ${t.pra_btel==='belum'?'selected':''}>Belum</option>
+            <option value="proses" ${t.pra_btel==='proses'?'selected':''}>Proses</option>
+            <option value="selesai" ${t.pra_btel==='selesai'?'selected':''}>Selesai</option>
+          </select>
+        </div>
+        <div class="form-group" style="max-width:340px;">
+          <label>Gatekeeper — Pra-SuEl</label>
+          <select data-gate="pra_suel" data-tid="${t.id}">
+            <option value="belum" ${t.pra_suel==='belum'?'selected':''}>Belum</option>
+            <option value="proses" ${t.pra_suel==='proses'?'selected':''}>Proses</option>
+            <option value="selesai" ${t.pra_suel==='selesai'?'selected':''}>Selesai</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" data-validator-approve="${t.id}">➡️ Lulus &amp; Teruskan ke Alih Media</button>
+        ${revisiForm(t,'validator','warkah','Kirim revisi ke Warkah')}
+      `;
+    }
+  }
+  if(role==='alih_media' || role==='admin'){
+    if(t.status==='alih_media'){
+      actions += `<button class="btn btn-gold" data-am-complete="${t.id}">🎉 Terbitkan Sertifikat Elektronik</button>`;
+      actions += revisiForm(t,'alih_media','validator','Kirim revisi ke Validator');
+    }
+  }
+  if((role==='loket' || role==='admin') && t.status==='dikembalikan'){
+    const confirmedForResend = t.revisions.find(r=>r.stage_tujuan==='loket' && r.status==='dikonfirmasi');
+    if(!confirmedForResend && !t.revisions.find(r=>r.stage_tujuan==='loket' && r.status==='aktif')){
+      actions += `<span class="sub-note">Tidak ada aksi lain untuk tiket ini saat ini.</span>`;
+    }
+  }
+  if(!actions) actions = `<span class="sub-note">Tidak ada aksi tersedia untuk role ini pada status tiket saat ini.</span>`;
+
+  return `
+    <div class="breadcrumb"><a data-nav="dashboard">Dashboard</a> <span>/</span> <span>${t.no}</span></div>
+    <div class="grid-2">
+      <div>
+        ${revisionPanels}
+        <div class="panel">
+          <div class="panel-head"><h3>Informasi Tiket</h3><span class="badge ${STATUS_BADGE[t.status]} dot">${STATUS_LABEL[t.status]}</span></div>
+          <div class="panel-body">
+            <div class="field-row"><div class="k">No. Tiket</div><div class="v mono">${t.no}</div></div>
+            <div class="field-row"><div class="k">Jenis Permohonan</div><div class="v">${t.jenis}</div></div>
+            <div class="field-row"><div class="k">Nama Pemohon</div><div class="v">${t.pemohon}</div></div>
+            <div class="field-row"><div class="k">NIK</div><div class="v">${t.nik}</div></div>
+            <div class="field-row"><div class="k">Tanggal Masuk</div><div class="v">${t.tanggal}</div></div>
+            <div class="field-row"><div class="k">Status Pembetulan</div><div class="v">${t.p}</div></div>
+            <div class="field-row"><div class="k">Status Verifikator</div><div class="v">${t.status_verifikator}</div></div>
+            <div class="field-row"><div class="k">Status Warkah</div><div class="v">${t.status_warkah}</div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Aksi</h3></div>
+          <div class="panel-body" style="display:flex;flex-direction:column;gap:10px;align-items:flex-start;">
+            ${actions}
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <div class="panel-head"><h3>Riwayat Status</h3></div>
+          <div class="panel-body"><div class="timeline">${historyHtml}</div></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function revisiForm(t, stageAsal, stageTujuan, label){
+  const already = t.revisions.find(r=>r.stage_asal===stageAsal && r.status==='aktif');
+  if(already) return '';
+  const fid = 'rev_'+stageAsal+'_'+t.id;
+  return `
+    <div class="divider" style="width:100%;"></div>
+    <div style="width:100%;">
+      <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;">${label}</label>
+      <textarea id="${fid}" rows="2" placeholder="Tuliskan catatan revisi yang wajib diisi..." style="width:100%;padding:10px;border-radius:9px;border:1px solid var(--line);font-family:inherit;font-size:12.8px;margin-bottom:8px;"></textarea>
+      <button class="btn btn-danger btn-sm" data-send-revisi="${t.id}" data-asal="${stageAsal}" data-tujuan="${stageTujuan}" data-fid="${fid}">🔴 Kirim Sebagai Revisi</button>
+    </div>
+  `;
+}
+
+function renderLaporan(){
+  const total = tickets.length;
+  const selesai = tickets.filter(t=>t.status==='selesai').length;
+  const perbaikan = tickets.filter(t=>t.status==='dikembalikan').length;
+  const batal = tickets.filter(t=>t.status==='batal').length;
+  const pct = total? Math.round(selesai/total*100) : 0;
+  return `
+    <div class="kpi-grid">
+      <div class="kpi accent-navy"><div class="lbl">Total Masuk</div><div class="val">${total}</div></div>
+      <div class="kpi accent-ok"><div class="lbl">Selesai</div><div class="val">${selesai}</div></div>
+      <div class="kpi accent-warn" style="border-top:3px solid var(--warn);"><div class="lbl">Perbaikan / Revisi</div><div class="val">${perbaikan}</div></div>
+      <div class="kpi accent-danger"><div class="lbl">Dibatalkan</div><div class="val">${batal}</div></div>
+      <div class="kpi accent-gold"><div class="lbl">% Selesai</div><div class="val">${pct}%</div></div>
+    </div>
+    <div class="panel"><div class="panel-head"><h3>Rekap per Jenis Permohonan</h3></div>
+      <div class="panel-body" style="padding:0;">
+        <table class="tbl"><thead><tr><th>Jenis Permohonan</th><th>Jumlah</th></tr></thead>
+        <tbody>
+          ${Object.entries(tickets.reduce((acc,t)=>{acc[t.jenis]=(acc[t.jenis]||0)+1;return acc;},{})).map(([j,c])=>`<tr><td>${j}</td><td>${c}</td></tr>`).join('')}
+        </tbody></table>
+      </div>
+    </div>
+  `;
+}
+
+function renderTracking(){
+  return `
+    <div class="panel" style="max-width:620px;">
+      <div class="panel-head"><h3>Cek Status Permohonan</h3></div>
+      <div class="panel-body">
+        <div class="form-group"><label>Nomor Tiket</label>
+          <input id="trackNo" placeholder="Contoh: K/23/070926/1" value="K/23/070926/1">
+        </div>
+        <button class="btn btn-primary" id="btnTrack">🔍 Lacak Status</button>
+        <div id="trackResult" style="margin-top:16px;"></div>
+      </div>
+    </div>
+  `;
+}
+
+// ---------- EVENTS ----------
+function bindGlobalEvents(){
+  const app = document.getElementById('app');
+
+  const roleSelect = document.getElementById('roleSelect');
+  if(roleSelect) roleSelect.addEventListener('change', e=>{
+    state.role = e.target.value; state.view='dashboard'; state.bellOpen=false; render();
+  });
+
+  const bellBtn = document.getElementById('bellBtn');
+  if(bellBtn) bellBtn.addEventListener('click', e=>{ e.stopPropagation(); state.bellOpen=!state.bellOpen; render(); });
+
+  document.querySelectorAll('[data-nav]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      state.view = el.getAttribute('data-nav');
+      state.listStage = el.getAttribute('data-stage') || null;
+      state.bellOpen=false;
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-open]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      state.view='detail'; state.selectedId=parseInt(el.getAttribute('data-open'));
+      markReadForRoleOnTicket(state.role, state.selectedId);
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-open-notif]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const tid = parseInt(el.getAttribute('data-open-notif'));
+      const nid = parseInt(el.getAttribute('data-notif-id'));
+      const n = notifikasis.find(x=>x.id===nid);
+      if(n) n.is_read = true;
+      state.view='detail'; state.selectedId=tid; state.bellOpen=false;
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-goto-role]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      state.role = el.getAttribute('data-goto-role');
+      state.view='detail'; state.selectedId = parseInt(el.getAttribute('data-goto-ticket'));
+      render();
+    });
+  });
+
+  const btnNew = document.getElementById('btnNewTicket');
+  if(btnNew) btnNew.addEventListener('click', ()=>{ state.view='createTicket'; render(); });
+
+  const btnSubmit = document.getElementById('btnSubmitTicket');
+  if(btnSubmit) btnSubmit.addEventListener('click', ()=>{
+    actCreateTicket({
+      no: document.getElementById('fNo').value || ('K/'+Math.floor(Math.random()*90+10)+'/070926/1'),
+      jenis: document.getElementById('fJenis').value,
+      pemohon: document.getElementById('fPemohon').value || 'Pemohon Baru',
+      nik: document.getElementById('fNik').value
+    });
+  });
+
+  document.querySelectorAll('[data-forward-loket]').forEach(el=>el.addEventListener('click',()=>actForwardFromLoket(getTicket(parseInt(el.dataset.forwardLoket)))));
+  document.querySelectorAll('[data-verif-lengkap]').forEach(el=>el.addEventListener('click',()=>actVerifikatorLengkap(getTicket(parseInt(el.dataset.verifLengkap)))));
+  document.querySelectorAll('[data-warkah-ok]').forEach(el=>el.addEventListener('click',()=>actWarkahDitemukan(getTicket(parseInt(el.dataset.warkahOk)))));
+  document.querySelectorAll('[data-validator-approve]').forEach(el=>el.addEventListener('click',()=>actValidatorApprove(getTicket(parseInt(el.dataset.validatorApprove)))));
+  document.querySelectorAll('[data-am-complete]').forEach(el=>el.addEventListener('click',()=>actAlihMediaComplete(getTicket(parseInt(el.dataset.amComplete)))));
+
+  document.querySelectorAll('[data-gate]').forEach(el=>el.addEventListener('change',()=>{
+    actSetGatekeeper(getTicket(parseInt(el.dataset.tid)), el.dataset.gate, el.value);
+  }));
+
+  document.querySelectorAll('[data-send-revisi]').forEach(el=>el.addEventListener('click',()=>{
+    const tid = parseInt(el.dataset.sendRevisi);
+    const t = getTicket(tid);
+    const pesan = document.getElementById(el.dataset.fid).value;
+    actKirimRevisi(t, el.dataset.asal, el.dataset.tujuan, pesan);
+  }));
+
+  document.querySelectorAll('[data-confirm-revisi]').forEach(el=>el.addEventListener('click',()=>{
+    actKonfirmasiRevisi(getTicket(parseInt(el.dataset.tid)), parseInt(el.dataset.confirmRevisi));
+  }));
+  document.querySelectorAll('[data-resend-revisi]').forEach(el=>el.addEventListener('click',()=>{
+    actKirimUlangRevisi(getTicket(parseInt(el.dataset.tid)), parseInt(el.dataset.resendRevisi));
+  }));
+
+  const btnTrack = document.getElementById('btnTrack');
+  if(btnTrack) btnTrack.addEventListener('click', ()=>{
+    const no = document.getElementById('trackNo').value.trim();
+    const t = tickets.find(x=>x.no.toLowerCase()===no.toLowerCase());
+    const box = document.getElementById('trackResult');
+    if(!t){ box.innerHTML = `<div class="alert alert-revisi"><div class="ah">Tiket tidak ditemukan</div>Periksa kembali nomor tiket Anda.</div>`; return; }
+    box.innerHTML = `
+      <div class="alert alert-info">
+        <div class="ah">${t.no} — ${STATUS_LABEL[t.status]}</div>
+        <div style="font-size:12.6px;">${t.pemohon} · ${t.jenis}</div>
+      </div>
+      <div class="timeline">${t.history.slice().reverse().map(hh=>`<div class="tl-item"><div class="tl-dot"></div><div class="tt">${hh.ket}</div><div class="td">${hh.waktu}</div></div>`).join('')}</div>
+    `;
+  });
+
+  document.addEventListener('click', function outsideBell(e){
+    if(state.bellOpen && !e.target.closest('.bell-wrap')){ state.bellOpen=false; render(); }
+  }, {once:true});
+}
+
+// ---------- INIT ----------
+seed();
+render();
+</script>
+</body>
+</html>
